@@ -93,7 +93,7 @@ bash menubar/build.sh    # → ~/Applications/UsageBar.app, launches at login
 
 Open Settings (gear icon) and set your hub URL, e.g. `http://192.168.1.10:3200`.
 Polls a ~40KB summary every 60s, backs off on failures and under Low Power
-Mode — measures **0.0% CPU / ~55MB** idle. `BUNDLE_ID` env customizes the app id.
+Mode — measures **0.0% CPU / ~35MB** idle. `BUNDLE_ID` env customizes the app id.
 
 ## Privacy
 
