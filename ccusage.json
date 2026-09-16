@@ -1,0 +1,49 @@
+{
+  "$schema": "./node_modules/ccusage/config-schema.json",
+  "defaults": {
+    "pricingOverrides": {
+      "x-preview-free": {
+        "inputCostPerToken": 0.00000015,
+        "outputCostPerToken": 0.0000005,
+        "cacheCreationInputTokenCost": 0.00000003,
+        "cacheReadInputTokenCost": 0.00000003
+      },
+      "x-preview-f-free": {
+        "inputCostPerToken": 0.00000015,
+        "outputCostPerToken": 0.0000005,
+        "cacheCreationInputTokenCost": 0.00000003,
+        "cacheReadInputTokenCost": 0.00000003
+      },
+      "ox-alpha": {
+        "inputCostPerToken": 0.00000015,
+        "outputCostPerToken": 0.0000005,
+        "cacheCreationInputTokenCost": 0.00000003,
+        "cacheReadInputTokenCost": 0.00000003
+      },
+      "ox-alpha-free": {
+        "inputCostPerToken": 0.00000015,
+        "outputCostPerToken": 0.0000005,
+        "cacheCreationInputTokenCost": 0.00000003,
+        "cacheReadInputTokenCost": 0.00000003
+      },
+      "ox-alpha-free-opencode-37": {
+        "inputCostPerToken": 0.00000015,
+        "outputCostPerToken": 0.0000005,
+        "cacheCreationInputTokenCost": 0.00000003,
+        "cacheReadInputTokenCost": 0.00000003
+      },
+      "ox-alpha-free-opencode-pc": {
+        "inputCostPerToken": 0.00000015,
+        "outputCostPerToken": 0.0000005,
+        "cacheCreationInputTokenCost": 0.00000003,
+        "cacheReadInputTokenCost": 0.00000003
+      },
+      "stealth/ox-alpha": {
+        "inputCostPerToken": 0.00000015,
+        "outputCostPerToken": 0.0000005,
+        "cacheCreationInputTokenCost": 0.00000003,
+        "cacheReadInputTokenCost": 0.00000003
+      }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "localId": "hub",
+  "machines": [
+    {
+      "id": "windows-pc",
+      "ssh": "user@192.168.1.50",
+      "shell": "powershell",
+      "bun": "$env:USERPROFILE\\.bun\\bin\\bunx.exe"
+    },
+    {
+      "id": "linux-box",
+      "ssh": "user@192.168.1.60"
+    },
+    {
+      "id": "my-laptop",
+      "ssh": "user@192.168.1.70",
+      "mode": "envelope",
+      "repo": "~/usage-dash"
+    }
+  ]
+}
