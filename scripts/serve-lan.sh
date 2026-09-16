@@ -3,7 +3,7 @@ set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PORT="${PORT:-3200}"
-HOST="${HOST:-$(ipconfig getifaddr "$(route -n get default | awk '/interface:/{print $2}')" 2>/dev/null || true)}"
+HOST="${HOST:-$(/usr/sbin/ipconfig getifaddr "$(/sbin/route -n get default | awk '/interface:/{print $2}')" 2>/dev/null || true)}"
 NODE="${NODE:-$(command -v node || command -v bun)}"
 
 [ -n "$HOST" ] || { echo "no LAN address found — set HOST=… and retry" >&2; exit 1; }
