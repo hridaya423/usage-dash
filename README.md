@@ -1,21 +1,27 @@
 # usage-dash
 
 **One dashboard for all your agent CLI usage.** Aggregates
-[ccusage](https://ccusage.com) data from every machine you own over SSH, and
-renders it as dithered charts ([dither-kit](https://www.tripwire.sh/dither-kit))
-— on the web, and in your menu bar.
+[ccusage](https://ccusage.com) data from every machine you own over SSH and
+renders it as dithered charts — on the web, and in your menu bar.
 
 <p align="center">
-  <img src="docs/dashboard.png" width="720" alt="usage-dash web dashboard"><br>
-  <img src="docs/menubar.png" width="300" alt="UsageBar menubar popover">
+  <img src="docs/dashboard.png" width="720" alt="usage-dash web dashboard">
 </p>
+
+## Features
 
 - **Multi-machine** — pull usage from any SSH-reachable Mac, Linux, or Windows box
 - **Web dashboard** — ranges (24h/7d/30d/90d), agent + model + day breakdowns, activity heatmap
 - **UsageBar** — dependency-free SwiftUI menubar app with full dashboard parity
 - **Efficient** — demand-driven scans (5-min cache), ~40KB summary endpoint, LAN-only serving
 
-## Setup
+## Requirements
+
+- [Bun](https://bun.sh) on the machine that hosts the dashboard
+- SSH access (key-based) to each machine you want to scan
+- macOS 14+ and Xcode Command Line Tools to build UsageBar
+
+## Quick start
 
 ```bash
 git clone <this-repo> && cd usage-dash
@@ -23,10 +29,10 @@ bash scripts/setup.sh      # installs deps, creates config, builds
 bun start                  # → http://<your-lan-ip>:3200
 ```
 
-That's it — zero config needed for a single-machine dashboard. Results cache
-in `.data/` for 5 minutes; the refresh button re-scans.
+Zero config needed for a single-machine dashboard. Results cache in `.data/`
+for 5 minutes; the refresh button re-scans.
 
-## Add machines
+## Adding machines
 
 Edit `machines.config.json` (created by setup — gitignored, your topology
 never leaves the repo):
@@ -71,19 +77,26 @@ Unreachable machines are skipped per scan — nothing ever fails hard. Add
 
 </details>
 
-## Keep it running
+## Running it permanently
 
 On an always-on Mac (a Mac Mini is ideal):
 
 ```bash
-bash scripts/install-service.sh    # launchd agent: start at login, restart on crash
+bash scripts/install-service.sh    # LaunchAgent: starts at login, restarts on crash
 ```
 
-Binds to the LAN interface only — no Tailscale, no loopback listener, nothing
-exposed beyond your network. `PORT` and `LABEL` env vars override the defaults
-(`3200`, `local.usage-dash`).
+For a headless Mac that sits at the login window after reboots, use the
+LaunchDaemon variant instead — it starts at boot with no login required:
 
-## Menubar app
+```bash
+bash scripts/install-daemon.sh     # stages the plist, prints the sudo command
+```
+
+Either way it binds to the LAN interface only — nothing is exposed beyond
+your network. `PORT` and `LABEL` env vars override the defaults (`3200`,
+`local.usage-dash`).
+
+## UsageBar
 
 On the Mac you'll monitor from:
 
@@ -93,7 +106,19 @@ bash menubar/build.sh    # → ~/Applications/UsageBar.app, launches at login
 
 Open Settings (gear icon) and set your hub URL, e.g. `http://192.168.1.10:3200`.
 Polls a ~40KB summary every 60s, backs off on failures and under Low Power
-Mode — measures **0.0% CPU / ~35MB** idle. `BUNDLE_ID` env customizes the app id.
+Mode — measures **0.0% CPU / ~35MB** idle. `BUNDLE_ID` env customizes the
+app id.
+
+<p align="center">
+  <img src="docs/menubar.png" width="340" alt="UsageBar menubar popover">
+</p>
+
+## How it works
+
+`scripts/fetch-all.sh` runs `ccusage` locally plus on every configured machine
+in parallel over SSH, merges the JSON with `scripts/merge-usage.ts`, and the
+Next.js app serves the merged result. Scans run only when a client asks and
+the cache is stale — no cron, no idle work.
 
 ## Privacy
 
