@@ -5,7 +5,7 @@ import type { UsageEnvelope } from "@/lib/ccusage-types"
 const CACHE_DIR = path.join(process.cwd(), ".data")
 const CACHE_FILE = path.join(CACHE_DIR, "usage-cache.json")
 const HISTORY_FILE = path.join(CACHE_DIR, "scan-history.json")
-const TTL_MS = 5 * 60 * 1000
+const TTL_MS = 60 * 1000
 const FETCH_SCRIPT = path.join(process.cwd(), "scripts", "fetch-all.sh")
 async function runCcusage(): Promise<UsageEnvelope> {
   const stdout = await new Promise<string>((resolve, reject) => {

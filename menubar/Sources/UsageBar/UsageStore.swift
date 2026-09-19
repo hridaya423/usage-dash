@@ -4,12 +4,14 @@ import Foundation
 import SwiftUI
 enum LabelPreset: String, CaseIterable {
     case todayAndWeekTokens = "todayAndWeekTokens"
+    case todayAndMonthTokens = "todayAndMonthTokens"
     case todayAndWeekCost = "todayAndWeekCost"
     case todayTokens = "todayTokens"
     case todayCost = "todayCost"
     var title: String {
         switch self {
         case .todayAndWeekTokens: return "Today · week tokens"
+        case .todayAndMonthTokens: return "Today · month tokens"
         case .todayAndWeekCost: return "Today · week cost"
         case .todayTokens: return "Today tokens"
         case .todayCost: return "Today cost"
@@ -59,6 +61,8 @@ final class UsageStore: ObservableObject {
         switch labelPreset {
         case .todayAndWeekTokens:
             return "\(formatCompactTokens(todayTokens)) · \(formatCompactTokens(summary.week.tokens))"
+        case .todayAndMonthTokens:
+            return "\(formatCompactTokens(todayTokens)) · \(formatCompactTokens(summary.month.tokens))"
         case .todayAndWeekCost:
             return "\(formatMoneyShort(todayCost)) · \(formatMoneyShort(summary.week.cost))"
         case .todayTokens:
