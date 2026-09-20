@@ -217,7 +217,8 @@ export function deriveDashboard(
   }
   const agentList = [...agents.values()].sort((a, b) => b.cost - a.cost || b.tokens - a.tokens)
   const rangeStart = rangeDays.length > 0 ? rangeDays[0].period : null
-  const rangeEnd = rangeDays.length > 0 ? rangeDays[rangeDays.length - 1].period : null
+  let rangeEnd = rangeDays.length > 0 ? rangeDays[rangeDays.length - 1].period : null
+  if (range === "90d" && rangeEnd) rangeEnd = addDaysISO(rangeEnd, 6)
   const { total: sessionCount, perAgent: sessionsPerAgent } = sessionsInRange(
     payload.session ?? [],
     rangeStart,

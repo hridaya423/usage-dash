@@ -85,7 +85,9 @@ function mergeBreakdowns(groups: ModelBreakdown[][]): ModelBreakdown[] {
   return [...byModel.values()]
 }
 function mergeDailyGroups(rows: DailyRow[]): DailyRow {
-  const machines = rows.map((row) => row.metadata?.machine ?? "unknown")
+  const machines = rows.flatMap(
+    (row) => row.metadata?.machines ?? [row.metadata?.machine ?? "unknown"]
+  )
   const base: DailyRow = {
     ...rows[0],
     inputTokens: 0,
@@ -122,50 +124,22 @@ function tagRows<T extends { metadata?: { machine?: string } }>(
     metadata: { ...(row.metadata ?? {}), machine: source },
   })) as T[]
 }
-function tagPeriods(
-  rows: PeriodRow[] | undefined,
-  source: Source
-): PeriodRow[] {
-  return (rows ?? []).map((row) => ({
-    ...row,
-    metadata: { ...(row.metadata ?? {}), machine: source },
-  }))
+function weekOf(iso: string): string {
+  const at = new Date(`${iso.slice(0, 10)}T00:00:00Z`)
+  at.setUTCDate(at.getUTCDate() - ((at.getUTCDay() + 6) % 7))
+  return at.toISOString().slice(0, 10)
 }
-function mergePeriodGroups(rows: PeriodRow[]): PeriodRow {
-  const machines = rows.map((row) => row.metadata?.machine ?? "unknown")
-  const base: PeriodRow = {
-    ...rows[0],
-    inputTokens: 0,
-    outputTokens: 0,
-    cacheCreationTokens: 0,
-    cacheReadTokens: 0,
-    totalTokens: 0,
-    totalCost: 0,
-    modelsUsed: [],
-    modelBreakdowns: [],
-  }
+function rollupPeriods(rows: DailyRow[], keyOf: (period: string) => string): PeriodRow[] {
+  const byKey = new Map<string, DailyRow[]>()
   for (const row of rows) {
-    addTokensInto(base, row)
-    base.totalCost += adjustedRowCost(row)
-    for (const model of row.modelsUsed) {
-      if (!base.modelsUsed.includes(model)) base.modelsUsed.push(model)
-    }
-  }
-  base.modelBreakdowns = mergeBreakdowns(rows.map((r) => r.modelBreakdowns))
-  base.modelsUsed.sort()
-  base.metadata = { machines }
-  return base as PeriodRow
-}
-function mergePeriods(...groups: PeriodRow[][]): PeriodRow[] {
-  const byKey = new Map<string, PeriodRow[]>()
-  for (const row of groups.flat()) {
-    const list = byKey.get(row.period)
+    const key = keyOf(row.period)
+    const list = byKey.get(key)
     if (list) list.push(row)
-    else byKey.set(row.period, [row])
+    else byKey.set(key, [row])
   }
   return [...byKey.entries()]
     .sort(([x], [y]) => x.localeCompare(y))
-    .map(([, rows]) => mergePeriodGroups(rows))
+    .map(([key, group]) => ({ ...mergeDailyGroups(group), period: key }) as PeriodRow)
 }
 function argValue(flag: string): string | undefined {
   const index = process.argv.indexOf(flag)
@@ -219,12 +193,10 @@ const daily = [...byDate.entries()]
   .map(([, rows]) => mergeDailyGroups(rows))
 const merged: UnifiedPayload & { sources: Source[] } = {
   daily,
-  weekly: mergePeriods(
-    ...srcs.map((s) => tagPeriods(s.payload?.weekly, s.id))
-  ),
-  monthly: mergePeriods(
-    ...srcs.map((s) => tagPeriods(s.payload?.monthly, s.id))
-  ),
+  // ponytail: weekly/monthly roll up from merged daily so every grain agrees and
+  // devin rows are included; source history older than daily's first row is lost (~$0)
+  weekly: rollupPeriods(daily, weekOf),
+  monthly: rollupPeriods(daily, (period) => period.slice(0, 7)),
   session: srcs.flatMap((s) =>
     s.payload?.session ? tagRows(s.payload.session, s.id) : []
   ),
